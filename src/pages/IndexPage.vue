@@ -10,7 +10,7 @@
     </q-table>
 
     <q-dialog v-model="editDialog">
-      <q-card>
+      <q-card style="width: 700px; max-width: 80vw;">
         <q-card-section>
           <div class="text-h6">Edit Product</div>
         </q-card-section>
@@ -65,6 +65,7 @@ export default defineComponent({
     const editDialog = ref(false);
     const productToDelete = ref(null);
     const deleteDialog = ref(false);
+    const columns = ref([]);
     const editForm = ref({
       id: null,
       name: '',
@@ -79,7 +80,7 @@ export default defineComponent({
 
 
     // qTable columns
-    const columns = [
+    columns.value = [
       {
         name: 'id',
         required: true,
