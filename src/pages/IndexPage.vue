@@ -1,7 +1,5 @@
 <template>
   <q-page>
-    <q-btn @click="fetchProducts" label="Fetch Products" color="primary" class="q-mt-xl" />
-
     <q-table :rows="products" :columns="columns" row-key="id" title="Car Info">
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
@@ -106,19 +104,17 @@ export default defineComponent({
     }
 
     const saveProduct = () => {
-      const rowIndex = products.value.findIndex(product => product.id === editForm.value.id)
-      if (rowIndex! !== -1) {
-        products.value[rowIndex] = { ...editForm.value }
+      const index = products.value.findIndex(item => item.id === editForm.value.id);
+      if (index !== -1) {
+        products.value.splice(index, 1, { ...editForm.value });
       }
-      editDialog.value = false
+      editDialog.value = false;
 
       $q.notify({
         color: 'green-4',
-        textColor: 'white',
-        icon: 'cloud_done',
         message: 'Product updated',
         type: 'positive',
-      })
+      });
     }
 
     const openDeleteDialog = (row) => {
