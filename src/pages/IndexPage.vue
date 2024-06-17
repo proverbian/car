@@ -1,55 +1,62 @@
 <template>
-  <q-page class="row items-center justify-evenly">
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page padding>
+    <q-btn @click="fetchProducts" label="Fetch Products" color="primary" class="q-mt-xl" />
+
+    <q-table :rows="products" :columns="columns" row-key="id" title="Car Info">
+      <template v-slot:body-cell-actions="props">
+        <q-td :props="props">
+          <q-btn flat dense @click="openEditDialog(props.row)" icon="edit" color="primary" />
+          <q-btn flat dense @click="confirmDelete(props.row)" icon="delete" color="negative" />
+        </q-td>
+      </template>
+    </q-table>
+
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
-
+import { defineComponent, computed, ref } from 'vue';
+//import { useQuasar } from 'quasar';
+import { useProductStore } from 'stores/product-store';
 export default defineComponent({
   name: 'IndexPage',
 
-  components: {
-    ExampleComponent
-  },
+  setup() {
 
-  setup () {
-    const todos = ref<Todo[]>([
-      {
-        id: 1,
-        content: 'ct1'
-      },
-      {
-        id: 2,
-        content: 'ct2'
-      },
-      {
-        id: 3,
-        content: 'ct3'
-      },
-      {
-        id: 4,
-        content: 'ct4'
-      },
-      {
-        id: 5,
-        content: 'ct5'
-      }
-    ]);
+    //const $q = useQuasar();
+    const productStore = useProductStore();
+    const products = computed(() => productStore.products)
+    const editDialog = ref();
 
-    const meta = ref<Meta>({
-      totalCount: 1200
-    });
+    // qTable columns
+    const columns = [
+      {
+        name: 'id',
+        required: true,
+        label: 'ID',
+        align: 'left',
+        field: 'id',
+        sortable: true,
+      },
+      { name: 'sku', align: 'justify', label: 'SKU', field: 'sku', sortable: true },
+      { name: 'title', label: 'Title', field: 'title', sortable: true, align: 'justify' },
+      { name: 'description', label: 'Description', field: 'description', align: 'justify' },
+      { name: 'category', label: 'Category', field: 'category' },
+      { name: 'price', label: 'Price', field: 'price' },
+      { name: 'total_rating', label: 'Total Rating', field: 'total_rating' },
+      { name: 'actions', label: 'Action', field: 'actions', sortable: false },
+    ]
 
-    return { todos, meta };
+    const fetchProducts = productStore.fetchProducts
+
+    fetchProducts();
+
+    return {
+      products,
+      columns,
+      fetchProducts
+    }
+
   }
 });
 </script>
