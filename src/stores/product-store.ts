@@ -18,8 +18,21 @@ export const useProductStore = defineStore('ProductStore', () => {
     }));
   };
 
+  const updateProduct = (product) => {
+    const index = products.value.findIndex((p) => p.id === product.id);
+    if (index !== -1) {
+      products.value[index] = product;
+    }
+  };
+
+  const deleteProduct = (id) => {
+    products.value = products.value.filter((product) => product.id !== id);
+  };
+
   return {
     products,
     fetchProducts,
+    updateProduct,
+    deleteProduct,
   };
 });

@@ -1,32 +1,84 @@
 <template>
-  <q-page padding>
+  <q-page>
     <q-btn @click="fetchProducts" label="Fetch Products" color="primary" class="q-mt-xl" />
 
     <q-table :rows="products" :columns="columns" row-key="id" title="Car Info">
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
           <q-btn flat dense @click="openEditDialog(props.row)" icon="edit" color="primary" />
-          <q-btn flat dense @click="confirmDelete(props.row)" icon="delete" color="negative" />
+          <q-btn flat dense @click="openDeleteDialog(props.row)" icon="delete" color="negative" />
         </q-td>
       </template>
     </q-table>
+
+    <q-dialog v-model="editDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Edit Product</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-input v-model="editForm.sku" label="SKU" />
+          <q-input v-model="editForm.title" label="Title" />
+          <q-input v-model="editForm.description" label="Description" />
+          <q-input v-model="editForm.category" label="Category" />
+          <q-input v-model="editForm.price" label="Price" type="number" />
+          <q-input v-model="editForm.total_rating" label="Total Rating" type="number" />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Save" color="primary" @click="saveProduct" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="deleteDialog">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">Confirm Deletion</div>
+        </q-card-section>
+
+        <q-card-section>
+          Are you sure you want to delete this product?
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="primary" v-close-popup />
+          <q-btn flat label="Confirm" color="negative" @click="deleteProduct" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
   </q-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref } from 'vue';
-//import { useQuasar } from 'quasar';
+import { useQuasar } from 'quasar';
 import { useProductStore } from 'stores/product-store';
 export default defineComponent({
   name: 'IndexPage',
 
   setup() {
 
-    //const $q = useQuasar();
+    const $q = useQuasar();
     const productStore = useProductStore();
     const products = computed(() => productStore.products)
-    const editDialog = ref();
+    const editDialog = ref(false);
+    const productToDelete = ref(null);
+    const deleteDialog = ref(false);
+    const editForm = ref({
+      id: null,
+      name: '',
+      sku: '',
+      title: '',
+      description: '',
+      category: '',
+      price: 0,
+      total_rating: 0,
+    })
+
+
 
     // qTable columns
     const columns = [
@@ -47,6 +99,49 @@ export default defineComponent({
       { name: 'actions', label: 'Action', field: 'actions', sortable: false },
     ]
 
+
+    const openEditDialog = (row) => {
+      editForm.value = { ...row }
+      editDialog.value = true
+    }
+
+    const saveProduct = () => {
+      const rowIndex = products.value.findIndex(product => product.id === editForm.value.id)
+      if (rowIndex! !== -1) {
+        products.value[rowIndex] = { ...editForm.value }
+      }
+      editDialog.value = false
+
+      $q.notify({
+        color: 'green-4',
+        textColor: 'white',
+        icon: 'cloud_done',
+        message: 'Product updated',
+        type: 'positive',
+      })
+    }
+
+    const openDeleteDialog = (row) => {
+      productToDelete.value = row
+      deleteDialog.value = true
+
+    }
+
+    const deleteProduct = () => {
+      productStore.deleteProduct(productToDelete.value.id)
+      deleteDialog.value = false
+      $q.notify({
+        color: 'red-4',
+        textColor: 'white',
+        icon: 'cloud_done',
+        message: 'Product deleted',
+        type: 'negative',
+      })
+    }
+
+
+
+
     const fetchProducts = productStore.fetchProducts
 
     fetchProducts();
@@ -54,7 +149,14 @@ export default defineComponent({
     return {
       products,
       columns,
-      fetchProducts
+      fetchProducts,
+      openEditDialog,
+      editForm,
+      editDialog,
+      saveProduct,
+      openDeleteDialog,
+      deleteDialog,
+      deleteProduct
     }
 
   }
